@@ -88,5 +88,79 @@ const verifyUserChagenPass = (req, res, next) => {
 };
 
 
-//////////////// crud user //////////////////
+//////////////// crud //////////////////
 
+app.post(
+    '/signup',
+    validateBody(usersSchema),
+    checkUsernameEmail,
+    async(req, res) => {
+        try{
+            const data = req.body;
+
+            const hashedPassword = await bcrypt.hash(data.password, 10);
+            const userSerializer = {
+                uuid: uuidv4(),
+                createdOn: new Date(),
+                email: data.email,
+                age: data.age,
+                username: data.username,
+            };
+            const userWithPassword = { ...userSerializer, password: hashedPassword };
+
+            userDB.push(userWithPassword);
+
+            res.status(201).json(userSerializer);
+        }   catch(err)  {
+            res.status(422).json({ message: 'error while creating an user' });
+        }
+    }
+);
+
+app.get('/users', authUser, (req, res) =>{
+    res.status(200).json(userDB);
+});
+
+app.put(
+    '/user/:uuid/password',
+    authUser,
+    verifyUserChagenPass,
+    async(req, res) => {
+        try{
+            const { user } = req;
+            const { password } = req.body;
+
+            const hasedPassword = await bcrypt.hash(password, 10);
+
+            user.password = hashedPassword;
+        }   catch(err) {
+            res.status(400).jason({ message: 'something went wrong' });
+        }
+
+        res.status(204).json('');
+    }
+);
+
+/////////////// login ///////////////
+
+app.post('/login', async(req, res) => {
+    const user = userDB.find((user)=> user.username == data.username);
+
+    try {
+        const match = await bcrypt.compare(data.password, user.password);
+
+        const token = jwt.sign(
+            {
+                username: data.username,
+                password: user.password,
+            },
+            jwtConfig.secret, {
+                expiresIn: jwtConfig.expiresIn
+            }
+        );
+
+        match ? res.status(200).json({ token: token }) : res.status(401).json({ message: 'invalid credentials' });
+    } catch (err) {
+        res.status(401).json({ message: 'invalid credentials' });
+    }
+});
