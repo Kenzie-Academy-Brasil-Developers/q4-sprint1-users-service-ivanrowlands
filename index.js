@@ -1,14 +1,14 @@
-import bcrypt from 'bcryptjs';
-import dotenv from 'dotenv';
-import express from 'express';
-import jwt from 'jsonwebtoken';
+import bcrypt from "bcrypt";
+import dotenv from "dotenv";
+import express from "express";
+import jwt from "jsonwebtoken";
 
-import { v4 as uuidv4 } from 'uuid';
-import * as yup from 'yup';
+import { v4 as uuidv4 } from "uuid";
+import * as yup from "yup";
 
 const app = express();
 
-app.use = express();
+app.use(express.json());
 
 dotenv.config();
 
@@ -77,7 +77,7 @@ const authUser = (req, res, next) => {
         req.user = user;
     });
 
-    next();
+    return next();
 };
 
 const verifyUserChagenPass = (req, res, next) => {
